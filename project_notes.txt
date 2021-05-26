@@ -1,0 +1,51 @@
+Research Question:  Does the use of three guest speakers (scientists) do any of the following...
+
+	1. affect change in students' knowledge of scientists in their lives
+	2. affect positive change in students' knowledge of scientists in their lives
+		-positive change as in an increase in scale value (0 - 5, 0 strong disagree, 5 strong agree)
+	3. affect negative change in students' knowledge of scientists in their lives
+
+Data Collection:
+
+	1. Survey released in week 2 of lectures 1 and 8
+		-see survey questions
+	2. Three guest speakers (professional scientists) present to each lecture
+		-these speakers present after the first survey is collected
+	3. Survey released in week 14 of lectures 1 and 8
+		-this survey is collected after the three speakers present
+		-this survey contains the same exact questions as the week 2 survey
+
+Survey questions:
+	1. Based on what you know now, describe the types of people that do science. If possible,
+	refer to specific scientists and what they tell you about the types of people that do
+	science.
+	2. I know of one (or more) important scientist(s) to whom I can personally relate
+		-this is likert question
+		-nominal scale if using question 1
+		-ordinal scale if using questions 2 or 3
+	3. Please explain your opinion of the statement
+		-referring to the likert question response
+
+Likert-Type
+note: Because the survey only contains one likert item, this is possibly likert-type. This means
+there is no attempt to combine multiple responses from the items into a composite scale (examples would 
+include non-related questions).  However, there may be some attempt to combine the before and after
+responses, as these are both the same survey and same participants. This could tend an argument for
+this study to be from a likert scale. This study only analyzes a single likert question twice, and a likert
+scale would require four or more likert-type items. 
+	-make sure to reach out about applicable tests for statistical analysis
+
+Likert analysis
+
+Ordinal data
+mode, median, frequency tests for variability
+chi-square measure of association
+kendall tau b
+kendall tau c
+
+if likert-scale, then use the following
+mean for central tendency and sd for variability
+pearson's r
+t-test
+ANOVA
+regression procedures
