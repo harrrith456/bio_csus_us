@@ -12,6 +12,7 @@ install.packages("")
 ```
 
 ```{r, include = FALSE}
+library(plyr)
 library(readtext)
 library(stringr)
 library(quanteda)
@@ -90,6 +91,17 @@ decreasing <- decreasing[ !(decreasing$q2.2 == "disagree" & decreasing$q2.14 == 
 decreasing <- decreasing[ !(decreasing$q2.2 == "disagree" & decreasing$q2.14 == "agree"), ]
 decreasing
 #write.xlsx(decreasing, file = "decreasing")
+```
+
+```{r}
+likert <- omit_2agree[ -c(2, 4, 5, 6, 8) ]
+likert_num2 <- revalue(likert$q2.2, c("agree" = 5, "somewhat agree" = 4, "I don't know" = 3, "somewhat disagree" = 2, "disagree" = 1))
+likert_num14 <- revalue(likert$q2.14, c("agree" = "5", "somewhat agree" = "4", "I don't know" = "3", "somewhat disagree" = "2", "disagree" = "1"))
+likert_num <- cbind(likert, likert_num2, likert_num14)
+likert_num <- likert_num[ -c(1,2,3) ]
+likert_num <- data.frame(lapply(likert_num,as.numeric))
+summary(likert_num)
+likert_num
 ```
 
 ```{r}
