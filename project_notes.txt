@@ -1,9 +1,9 @@
 Research Question:  Does the use of three guest speakers (scientists) do any of the following...
 
-	1. affect change in students' knowledge of scientists in their lives
-	2. affect positive change in students' knowledge of scientists in their lives
-		-positive change as in an increase in scale value (0 - 5, 0 strong disagree, 5 strong agree)
-	3. affect negative change in students' knowledge of scientists in their lives
+	1. affect change in students' knowledge of scientists that they can relate to
+	2. affect positive change in students' knowledge of scientists that they can relate to
+		-positive change as in an increase in scale value (1 - 5, 1 disagree, 5 agree)
+	3. affect negative change in students' knowledge of scientists that they can relate to
 
 Data Collection:
 
@@ -37,7 +37,9 @@ scale would require four or more likert-type items.
 
 Likert analysis
 
-Ordinal data
+Nominal data is suspicion but (source) says all likert-type is treated as ordinal
+
+Likert-type is Ordinal data
 mode, median, frequency tests for variability
 chi-square measure of association
 kendall tau b
@@ -49,3 +51,10 @@ pearson's r
 t-test
 ANOVA
 regression procedures
+(suspicion is that likert-scale is not applicable)
+
+Text analysis
+	1. sentiment analysis
+	2. kmeans clustering?
+		-group by likert responses?
+	3. pca? (didn't seem to yield useful info)
