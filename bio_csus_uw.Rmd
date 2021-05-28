@@ -31,7 +31,7 @@ library(ggfittext)
 
 This is an exploratory document intended to be used as 'scratch paper' for data analysis. Some of the code is left in for imitation as may be necessary. The comments throughout are meant to explain code choices and data summaries. Happy reading!
 
-```{r, warning = FALSE}
+```{r, include = FALSE}
 ### IMPORT DATA/CREATE SUBSETS  ###
 ###################################
 
@@ -40,6 +40,7 @@ data_wk14 <- readtext("/Users/ryanharris/Downloads/Bio2_Sp21_Week14_Survey_JM_RH
 data_wk14
 ## data_alv comes from a file created outside of R, included file (merged.xlsx) with rmd email
 data_alv <- readtext("/Users/ryanharris/Desktop/merged.xlsx")
+#inc_copy <- readtext("/Users/ryanharris/Desktop/increasing_copy.xlsx")
 
 ## each of the readtext() functions above are path specific to my machine
 ## to imitate, use data <- readtext("/path_to_files/data.xslx")
@@ -57,7 +58,7 @@ data_alv <- data_alv[-c(1)]
 colnames(data_alv) <- c("Participant.ID", "survey", "q1", "q2", "q3", "lecture")
 ```
 
-```{r, warning = FALSE}
+```{r, include = FALSE}
 ## replace column values with numbers for easier data visuals
 
 likert_num2 <- revalue(merged_data$q2.2, c("agree" = 5, "somewhat agree" = 4, "I don't know" = 3, "somewhat disagree" = 2, "disagree" = 1))
@@ -77,7 +78,7 @@ col_order <- c("Participant.ID", "q1.2", "likert_num2", "q3.2", "lecture.x", "q1
 likert <- likert[, col_order]
 ```
 
-```{r, warning = FALSE}
+```{r, include = FALSE}
 ## this is a more efficient way to create the subsets requested
 
 increasing <- likert[ !(likert$difference <= 0 ), ]
@@ -88,7 +89,7 @@ omit_2agree <- likert[ !(likert$difference == 0 & likert_num2 == 5 ), ]
 #write.xlsx(omit_2agree, file = "no_both_agree")
 ```
 
-```{r, warning = FALSE}
+```{r, include = FALSE}
 ### FOR SUMMARY STATS ###
 #########################
 
@@ -149,11 +150,11 @@ ggplot(decreasing_sum) +
   geom_bar(aes(likert_num14))
 ```
 
-```{r}
+```{r, include = FALSE}
 alluvial1 <- omit_2agree[ , !(names(omit_2agree) %in% c("Participant.ID", "q1.2", "q3.2", "q1.14", "q3.14", "difference"))]
 ```
 
-```{r}
+```{r, warning = FALSE}
 ### REVERT LIKERT COLUMNS TO RESPONSES  ###
 ###########################################
 
@@ -172,13 +173,11 @@ increasing2 <- increasing2[ , !(names(increasing2) %in% c("Participant.ID", "q1.
 ### RANDOMIZE INCREASING SUBSET ###
 ###################################
 
-# Data is randomized by row. I created two new dataframes - rand_increasing and rand_inc_censor. The first is for reference (so that we may un-randomize the dataframe or identify participants as needed). The second is the censored version (for Sheelta). 
+# Data is randomized by row. I created two new dataframes - rand_increasing and rand_inc_censor. The first is for reference (so that we may un-randomize the dataframe or identify participants as needed). The second is the censored version (for Sheelta). The censored version only includes the three survey questions (columns for pre/post, participant ID, and lecture are omitted).
 
-# both dataframes written to spreadsheets and attached to email with this Rmd file.
-
-rand <- sample(nrow(increasing))
-rand_increasing <- increasing[rand,]
-rand_inc_censor <- rand_increasing[ , !(names(rand_increasing) %in% c("Participant.ID", "lecture.x"))]
+rand <- sample(nrow(increasing_copy))
+rand_increasing <- increasing_copy[rand,]
+rand_inc_censor <- rand_increasing[ , !(names(rand_increasing) %in% c("survey", "Participant.ID", "lecture"))]
 #write.xlsx(rand_increasing, file = "increasing_uncensored.xlsx")
 #write.xlsx(rand_inc_censor, file = "increasing_censored.xlsx")
 ```
@@ -242,9 +241,4 @@ ggplot(merged_data, aes(axis1 = likert_num2, axis2 = likert_num14)) +
   stat_stratum(reverse = FALSE) +
   scale_fill_manual(values=c("#FF0000", "#eb8686", "#808080", "#86a6d9", "#6271e3")) +
   geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
-```
-
-```{r}
-alluvial1 <- omit_2agree[ , !(names(omit_2agree) %in% c("Participant.ID", "q1.2", "q3.2", "q1.14", "q3.14", "difference"))]
-omit_2agree
 ```
