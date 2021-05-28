@@ -244,3 +244,7 @@ ggplot(merged_data, aes(axis1 = likert_num2, axis2 = likert_num14)) +
   geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
 ```
 
+```{r}
+alluvial1 <- omit_2agree[ , !(names(omit_2agree) %in% c("Participant.ID", "q1.2", "q3.2", "q1.14", "q3.14", "difference"))]
+omit_2agree
+```
