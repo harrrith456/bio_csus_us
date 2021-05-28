@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, warning = FALSE}
+```{r, include = FALSE}
 #install.packages("")
 ```
 
@@ -63,12 +63,6 @@ colnames(data_alv) <- c("Participant.ID", "survey", "q1", "q2", "q3", "lecture")
 likert_num2 <- revalue(merged_data$q2.2, c("agree" = 5, "somewhat agree" = 4, "I don't know" = 3, "somewhat disagree" = 2, "disagree" = 1))
 likert_num14 <- revalue(merged_data$q2.14, c("agree" = "5", "somewhat agree" = "4", "I don't know" = "3", "somewhat disagree" = "2", "disagree" = "1"))
 
-response <- c("disagree", "somewhat disagree", "I don't know", "somewhat agree", "agree")
-value <- 1:5
-
-## note that the values relate as follows:
-data.frame(response,value)
-
 merged_data <- merged_data[ -c(3, 7) ] ##these columns will be replaced with numbers
 likert <- cbind(merged_data, likert_num2, likert_num14)
 
@@ -108,9 +102,7 @@ decreasing_num <- data.frame(lapply(decreasing,as.numeric))
 omit_2agree_num <- data.frame(lapply(omit_2agree,as.numeric))
 ```
 
-Note that the difference represents the direction and magnitude of change between survey responses for week 2 and week 14. Note that the magnitude is not applicable for any reason other than recording the number of decisions between each survey choice + 1. For example, if a participant responds "somewhat disagree" in week 2 and "agree" in week 14, then the difference is 5 - 2 = 3. A negative value indicates a participant going in the opposite direction (like from "somewhat agree" to "I don't know", for example).
-
-```{r}
+```{r, include = FALSE}
 ### SUMMARY STATS AND FREQUENCY DIAGRAMS  ###
 #############################################
 
@@ -157,165 +149,98 @@ ggplot(decreasing_sum) +
   geom_bar(aes(likert_num14))
 ```
 
-This first alluvial diagram uses the CRAN package that was discussed during our interview. I found this was much more difficult to work with compared to using the ggplot version.
+```{r}
+alluvial1 <- omit_2agree[ , !(names(omit_2agree) %in% c("Participant.ID", "q1.2", "q3.2", "q1.14", "q3.14", "difference"))]
+```
 
 ```{r}
-### ALLUVIAL DIAGRAMS ###
-#########################
+### REVERT LIKERT COLUMNS TO RESPONSES  ###
+###########################################
 
-## using alluvial
-drops <- c("Participant.ID", "q1.2", "q3.2", "q1.14", "q3.14", "difference")
-alluvial1 <- omit_2agree[ , !(names(omit_2agree) %in% drops)]
-freq_data <- setDT(alluvial1)[,rep(.N,.N),.(likert_num2, lecture.x, likert_num14)]
-plot1 <- alluvial(freq_data[,1:3], freq=freq_data$V1)
+dp <- c("likert_num2", "lecture.x", "likert_num14")
+likert_org2 <- revalue(alluvial1$likert_num2, c("5" = "agree", "4" = "somewhat agree", "3" = "I don't know", "2" = "somewhat disagree", "1" = "disagree"))
+likert_org14 <- revalue(alluvial1$likert_num14, c("5" = "agree", "4" = "somewhat agree", "3" = "I don't know", "2" = "somewhat disagree", "1" = "disagree"))
+alluvial2 <- cbind(likert_org2, likert_org14)
+
+likert_inc2 <- revalue(increasing$likert_num2, c("4" = "somewhat agree", "3" = "I don't know", "2" = "somewhat disagree", "1" = "disagree"))
+likert_inc14 <- revalue(increasing$likert_num14, c("5" = "agree", "4" = "somewhat agree", "3" = "I don't know", "2" = "somewhat disagree"))
+increasing2 <- cbind(increasing, likert_inc2, likert_inc14)
+increasing2 <- increasing2[ , !(names(increasing2) %in% c("Participant.ID", "q1.2", "likert_num2", "q3.2", "lecture.x", "q1.14", "likert_num14", "q3.14", "difference")) ]
 ```
 
-Most of the alluvial diagrams here are very similar. The comment lines above each plot in the code chunk below include information about what is presented in the corresponding images.
+```{r}
+### RANDOMIZE INCREASING SUBSET ###
+###################################
 
-The first plot uses only two axes (before and after likert responses). This uses an augmented version of the data that was created outside of R (it was easier to just manipulate directly with excel).
+# Data is randomized by row. I created two new dataframes - rand_increasing and rand_inc_censor. The first is for reference (so that we may un-randomize the dataframe or identify participants as needed). The second is the censored version (for Sheelta). 
 
-All remaining alluvial diagrams use three axes (the middle axis being the lecture, left and right being the survey responses for weeks 2 and 14, respectively). The image labels and keys are rudimentary - these can be cleaned up as necessary.
+# both dataframes written to spreadsheets and attached to email with this Rmd file.
 
-```{r, warning = FALSE}
-### MERGED/ALV DATA ###
-#######################
-
-## two axes, color by lecture
-ggplot(data_alv, aes(x = survey, stratum = q2, alluvium = Participant.ID)) +
-  geom_alluvium(aes(fill = lecture)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)), min.y = 4)
-#setting the min.y ensures that the stratum labels don't interfere with the image. In this case, disagree is not labeled in the rightmost axis.
-
-## color by week 14 responses
-ggplot(merged_data, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num14)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)), min.y = 4)
-
-## color by week 2 responses
-ggplot(merged_data, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num2)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
-
-## color by lecture
-ggplot(merged_data, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = lecture.x)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
+rand <- sample(nrow(increasing))
+rand_increasing <- increasing[rand,]
+rand_inc_censor <- rand_increasing[ , !(names(rand_increasing) %in% c("Participant.ID", "lecture.x"))]
+#write.xlsx(rand_increasing, file = "increasing_uncensored.xlsx")
+#write.xlsx(rand_inc_censor, file = "increasing_censored.xlsx")
 ```
 
+The first alluvial diagram includes everything asked of me excepting the order of the strata.  The second diagram includes everything asked of me excepting the labelling of the strata with words instead of numbers.  I am having trouble implementing both simultaneously, but I will continue to look at it.  The next two alluvial diagrams are the same, but with the increasing subset.
 
 ```{r, warning = FALSE}
 ### MERGED DATA WITHOUT BOTH AGREE  ###
 #######################################
 
-## color by week 14 responses
-ggplot(alluvial1, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num14)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
+ggplot(alluvial2, aes(axis1 = likert_org2, axis2 = likert_org14)) +
+  geom_alluvium(aes(fill = likert_org2), reverse = FALSE) +
+  geom_stratum(reverse = FALSE) +
+  scale_fill_manual(values=c("#FF0000", "#eb8686", "#808080", "#86a6d9", "#6271e3")) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
 
-## color by week 2 responses
-ggplot(alluvial1, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num2)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
-
-## color by lecture
-ggplot(alluvial1, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = lecture.x)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
+ggplot(omit_2agree, aes(axis1 = likert_num2, axis2 = likert_num14)) +
+  geom_alluvium(aes(fill = likert_num2), reverse = FALSE) +
+  geom_stratum(reverse = FALSE) +
+  scale_fill_manual(values=c("#FF0000", "#eb8686", "#808080", "#86a6d9", "#6271e3")) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
 ```
 
 ```{r, warning = FALSE}
 ### INCREASING SUBSET ###
 #########################
 
-## color by week 14 responses
-ggplot(increasing, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num14)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
+ggplot(increasing2, aes(axis1 = likert_inc2, axis2 = likert_inc14)) +
+  geom_alluvium(aes(fill = likert_inc2), reverse = FALSE) +
+  geom_stratum(reverse = FALSE) +
+  scale_fill_manual(values=c("#FF0000", "#eb8686", "#808080", "#86a6d9", "#6271e3")) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
 
-## color by week 2 responses
-ggplot(increasing, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num2)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
-
-## color by lecture
-ggplot(increasing, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = lecture.x)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
+ggplot(increasing, aes(axis1 = likert_num2, axis2 = likert_num14)) +
+  geom_alluvium(aes(fill = likert_num2), reverse = FALSE) +
+  geom_stratum(reverse = FALSE) +
+  scale_fill_manual(values=c("#FF0000", "#eb8686", "#808080", "#86a6d9", "#6271e3")) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
 ```
+Any diagrams found below here were not included in the top two choices for the 2-panel figure for the grant report.  I can implement the same requests from the above subsets with any of the data as needed.
 
 ```{r, warning = FALSE}
 ### DECREASING SUBSET ###
 #########################
 
-## color by week 14 responses
-ggplot(decreasing, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num14)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
-
 ## color by week 2 responses
-ggplot(decreasing, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = likert_num2)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
-
-## color by lecture
-ggplot(decreasing, aes(axis1 = likert_num2, axis2 = lecture.x, axis3 = likert_num14)) +
-  geom_alluvium(aes(fill = lecture.x)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)))
+ggplot(decreasing, aes(axis1 = likert_num2, axis2 = likert_num14)) +
+  geom_alluvium(aes(fill = likert_num2), reverse = FALSE) +
+  geom_stratum(reverse = FALSE) +
+  scale_fill_manual(values=c("#FF0000", "#eb8686", "#808080", "#86a6d9", "#6271e3")) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
 ```
-
-The following is used to create a document term matrix (DTM) for the free response survey questions in both weeks.
 
 ```{r, warning = FALSE}
-### CREATE DTM  ###
-###################
+### MERGED/ALV DATA ###
+#######################
 
-# data5 <- data_wk2[, 5]
-# data5_corp <- corpus(data5)
-# dtm5 <- dfm(data5_corp, tolower = TRUE, remove_punct = TRUE, stem = TRUE, remove = stopwords("english"))
-# dtm5freq <- docfreq(dtm5)
-# dtm5 <- dtm5[, dtm5freq >= 2]
-# 
-# data7 <- data_wk2[, 7]
-# data7_corp <- corpus(data7)
-# dtm7 <- dfm(data7_corp, tolower = TRUE, remove_punct = TRUE, stem = TRUE, remove = stopwords("english"))
-# dtm7freq <- docfreq(dtm7)
-# dtm7 <- dtm7[, dtm7freq >= 2]
-# 
-# data5_14 <- data_wk14[, 3]
-# data5_14_corp <- corpus(data5_14)
-# dtm5_14 <- dfm(data5_14_corp, tolower = TRUE, remove_punct = TRUE, stem = TRUE, remove = stopwords("english"))
-# dtm5_14freq <- docfreq(dtm5_14)
-# dtm5_14 <- dtm5_14[, dtm5_14freq >= 2]
-# 
-# data7.14 <- data_wk14[, 5]
-# data7.14_corp <- corpus(data7.14)
-# dtm7.14 <- dfm(data7.14_corp, tolower = TRUE, remove_punct = TRUE, stem = TRUE, remove = stopwords("english"))
-# dtm7.14freq <- docfreq(dtm7.14)
-# dtm7.14 <- dtm7.14[, dtm7_14freq >= 2]
+ggplot(merged_data, aes(axis1 = likert_num2, axis2 = likert_num14)) +
+  geom_alluvium(aes(fill = likert_num2), reverse = FALSE) +
+  geom_stratum() +
+  stat_stratum(reverse = FALSE) +
+  scale_fill_manual(values=c("#FF0000", "#eb8686", "#808080", "#86a6d9", "#6271e3")) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), reverse = FALSE)
 ```
 
-```{r}
-### DICTIONARY AND COUNTING ###
-###############################
-
-#download.file("http://bit.ly/37cV95h", tf <- tempfile())
-#myDict <- dictionary(file = tf, format = "LIWC")
-#dict_dtm5 <- dfm_lookup(dtm5, myDict, nomatch = "_unmatched")
-#dict_dtm5
-
-#dict_dtm7 <- dfm_lookup(dtm7, myDict, nomatch = "_unmatched")
-#dict_dtm7
-```
